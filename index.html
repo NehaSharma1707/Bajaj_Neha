@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BFHL API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BFHL API Tester</h1>
+
+        <div class="form-group">
+            <label for="fibonacci">Fibonacci (enter a number):</label>
+            <input type="number" id="fibonacci" min="0">
+            <button onclick="testFibonacci()">Test Fibonacci</button>
+        </div>
+
+        <div class="form-group">
+            <label for="prime">Prime (enter comma-separated numbers):</label>
+            <input type="text" id="prime" placeholder="e.g., 2,4,7,9,11">
+            <button onclick="testPrime()">Test Prime</button>
+        </div>
+
+        <div class="form-group">
+            <label for="lcm">LCM (enter comma-separated numbers):</label>
+            <input type="text" id="lcm" placeholder="e.g., 12,18,24">
+            <button onclick="testLCM()">Test LCM</button>
+        </div>
+
+        <div class="form-group">
+            <label for="hcf">HCF (enter comma-separated numbers):</label>
+            <input type="text" id="hcf" placeholder="e.g., 24,36,60">
+            <button onclick="testHCF()">Test HCF</button>
+        </div>
+
+        <div class="form-group">
+            <label for="ai">AI Question:</label>
+            <input type="text" id="ai" placeholder="e.g., What is the capital city of Maharashtra?">
+            <button onclick="testAI()">Test AI</button>
+        </div>
+
+        <div class="form-group">
+            <button onclick="testHealth()">Test Health</button>
+        </div>
+
+        <div id="response" class="response"></div>
+    </div>
+
+    <script>
+        async function makeRequest(endpoint, data) {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+            return response.json();
+        }
+
+        async function testFibonacci() {
+            const value = parseInt(document.getElementById('fibonacci').value);
+            if (isNaN(value) || value < 0) {
+                document.getElementById('response').innerHTML = '<span class="error">Please enter a valid non-negative integer.</span>';
+                return;
+            }
+            const result = await makeRequest('/bfhl', { fibonacci: value });
+            document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testPrime() {
+            const value = document.getElementById('prime').value.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+            if (value.length === 0) {
+                document.getElementById('response').innerHTML = '<span class="error">Please enter valid numbers separated by commas.</span>';
+                return;
+            }
+            const result = await makeRequest('/bfhl', { prime: value });
+            document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testLCM() {
+            const value = document.getElementById('lcm').value.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x > 0);
+            if (value.length < 2) {
+                document.getElementById('response').innerHTML = '<span class="error">Please enter at least two positive integers separated by commas.</span>';
+                return;
+            }
+            const result = await makeRequest('/bfhl', { lcm: value });
+            document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testHCF() {
+            const value = document.getElementById('hcf').value.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x > 0);
+            if (value.length < 2) {
+                document.getElementById('response').innerHTML = '<span class="error">Please enter at least two positive integers separated by commas.</span>';
+                return;
+            }
+            const result = await makeRequest('/bfhl', { hcf: value });
+            document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testAI() {
+            const value = document.getElementById('ai').value.trim();
+            if (value === '') {
+                document.getElementById('response').innerHTML = '<span class="error">Please enter a question.</span>';
+                return;
+            }
+            const result = await makeRequest('/bfhl', { AI: value });
+            document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testHealth() {
+            const response = await fetch('/health');
+            const result = await response.json();
+            document.getElementById('response').textContent = JSON.stringify(result, null, 2);
+        }
+    </script>
+</body>
+</html>
